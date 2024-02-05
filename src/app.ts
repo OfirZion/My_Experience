@@ -2,14 +2,16 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import bodyParser from "body-parser";
-//import mongoose from "mongoose";
+import mongoose from "mongoose";
 const app = express();
 const port = process.env.PORT;
+const DB_URL = process.env.DB_URL;
 
-// mongoose.connect(process.env.DB_URL!); 
-// const db = mongoose.connection;
-// db.on("error",(error) => console.error(error));
-// db.once("open", ()=> console.log("connected to mongo"));
+
+mongoose.connect(DB_URL!); 
+const db = mongoose.connection;
+db.on("error",(error) => console.error(error));
+db.once("open", ()=> console.log("connected to mongo"));
 
 app.use(bodyParser.urlencoded({ extended:true})); 
 app.use(bodyParser.json());
