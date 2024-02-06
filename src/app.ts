@@ -1,27 +1,35 @@
-import express from "express";
+import express, {Express} from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-const app = express();
-const port = process.env.PORT;
-const DB_URL = process.env.DB_URL;
+const prod_DB_URL = process.env.DB_URL;
 
 
-mongoose.connect(DB_URL!); 
-const db = mongoose.connection;
-db.on("error",(error) => console.error(error));
-db.once("open", ()=> console.log("connected to mongo"));
+const initApp = (url=prod_DB_URL): Promise<Express> => { 
+    const promise = new Promise<Express>((resolve) => {
+       
+        const db = mongoose.connection;
+        db.on("error", (error) => console.error(error));
+        db.once("open", () => console.log("connected to mongo"));
+        mongoose.connect(url!).then(() => { 
+            const app = express();
+            app.use(bodyParser.urlencoded({ extended:true})); 
+            app.use(bodyParser.json());
+            resolve(app);
+        });
 
-app.use(bodyParser.urlencoded({ extended:true})); 
-app.use(bodyParser.json());
+    });
+           
+    return promise;
+}
 
-app.get("/", (req,res) =>{
-    res.send("get student");
-});
+// app.get("/", (req,res) =>{
+//     res.send("get student");
+// });
+// const port = process.env.PORT;
+// app.listen(port, () =>{
+//     console.log(`Example at http://localhost:${port}/`);
+// }); 
 
-app.listen(port, () =>{
-    console.log(`Example at http://localhost:${port}/`);
-}); 
-
-export default app;
+export default initApp;

@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "tsc && jest --detectOpenHandles --forceExit",
-    "start": "tsc && node ./dist/src/app.js",
-    "dev": "ts-node-dev --respawn --transpile-only ./src/app.ts"
+    "start": "tsc && node ./dist/src/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts"
   },
   "author": "Ofir Zion",
   "license": "ISC",
