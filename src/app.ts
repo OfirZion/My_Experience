@@ -18,7 +18,7 @@ const initApp = (url=prod_DB_URL): Promise<Express> => {
             app.use(bodyParser.json());
             resolve(app);
         });
-
+        // ADD ROUTES HERE
     });
            
     return promise;

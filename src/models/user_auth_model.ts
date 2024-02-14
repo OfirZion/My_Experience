@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 export interface IUserAuth{
     email: string;
     password: number;
-    //_id?: string;
     refreshTokens?: string[];
 } 
 
