@@ -1,19 +1,22 @@
 import mongoose, {Schema} from "mongoose"; 
+import { IUser } from "./user_model";
+import { IUserPost } from "./user_post_model";
+import { ICommentRating } from "./rating_comment_model";
 
-export interface IUserComment{
-    title: string;
+export interface IUserComment {
     message: string;
+    post: (Schema.Types.ObjectId | IUserPost); 
+    ratings: (Schema.Types.ObjectId | ICommentRating)[];
     comment_owner_name: string;
-    comment_owner_id: {type: Schema.Types.String, ref: "User"};
-    comment_father_id: {type: Schema.Types.ObjectId};
+    comment_owner: (Schema.Types.ObjectId | IUser); // (Many to one
 } 
 
 const userCommentSchema = new mongoose.Schema<IUserComment>({
-    title: {type: String, required: true},
     message: {type: String, required: true},
     comment_owner_name: {type: String, required: true},
-    comment_owner_id: {type: Schema.Types.String, ref: "User", required: true},
-    comment_father_id: {type: Schema.Types.ObjectId, required: true}
+    post: {type: Schema.Types.ObjectId, ref: "UserPost", required: true},
+    ratings: [{type: Schema.Types.ObjectId, ref: "CommentRating", required: false}],
+    comment_owner: {type: Schema.Types.ObjectId, ref: "User", required: true},
 });
 
 export default mongoose.model<IUserComment>("UserComment", userCommentSchema);

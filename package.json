@@ -4,16 +4,21 @@
   "description": "Backend for a Social Web App",
   "main": "app.js",
   "scripts": {
-    "test": "tsc && jest --detectOpenHandles --forceExit",
-    "start": "tsc && node ./dist/src/server.js",
+    "test": "tsc && jest --detectOpenHandles --runInBand --forceExit",
+    "start": "tsc && node ./dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts"
   },
   "author": "Ofir Zion",
   "license": "ISC",
   "dependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.5",
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.2",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.1.1"
   },
   "devDependencies": {

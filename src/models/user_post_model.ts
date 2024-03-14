@@ -1,23 +1,30 @@
 import mongoose, { Schema } from "mongoose"; 
+import { IUser } from "./user_model";
+import { IUserComment } from "./user_comment_model";
+import { IPostRating } from "./rating_post_model";
 
-export interface IUserPost{
+export interface IUserPost {
     title: string;
     message: string;
     post_owner_name: string;
-    post_owner_id: {type: Schema.Types.String, ref: "User"};
+    post_owner: Schema.Types.ObjectId | IUser
+    ratings: (Schema.Types.ObjectId | IPostRating)[];
     imgUrl?: string;
     exp_rating: number;
-    num_of_comments?: number;
+    comments: (Schema.Types.ObjectId | IUserComment)[];
+    created_at?: Date;
 } 
 
 const userPostSchema = new mongoose.Schema<IUserPost>({
     title: {type: String, required: true},
     message: {type: String, required: true},
     post_owner_name: {type: String, required: true},
-    post_owner_id: {type: Schema.Types.String, ref: "User", required: true},
+    post_owner: {type: Schema.Types.ObjectId, ref: "User", required: true},
     imgUrl: {type: String, required: false},
     exp_rating: {type: Number, required: true},
-    num_of_comments: {type: Number, required: false}
+    ratings: [{type: Schema.Types.ObjectId, ref: "PostRating", required: false}],
+    comments: [{type: Schema.Types.ObjectId, ref: "UserComment", required: false}],
+    created_at: {type: Date, }
 }); 
 
 export default mongoose.model<IUserPost>("UserPost", userPostSchema);

@@ -1,14 +1,15 @@
 import mongoose, { Schema } from "mongoose"; 
+import { IUser } from "./user_model";
 
-export interface IFollow{
-    followerID: {type: Schema.Types.String, ref: "User"};
-    followingID: {type: Schema.Types.String, ref: "User"};
+export interface IFollow {
+    follower: Schema.Types.ObjectId | IUser
+    following: Schema.Types.ObjectId | IUser
     dateAdded?: Date; //not sure if should be not required?
 } 
 
 const followSchema = new mongoose.Schema<IFollow>({
-    followerID: {type: Schema.Types.String, ref: "User", required: true},
-    followingID: {type: Schema.Types.String, ref: "User", required: true},
+    follower: { type: Schema.Types.ObjectId, ref: "User", required: true},
+    following: { type: Schema.Types.ObjectId, ref: "User", required: true},
     dateAdded: {type: Date, required: false}
 }); 
 

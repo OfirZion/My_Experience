@@ -27,7 +27,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const followSchema = new mongoose_1.default.Schema({
     followerID: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     followingID: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    //dateAdded: {type: Date, required: true}
+    dateAdded: { type: Date, required: false }
 });
 exports.default = mongoose_1.default.model("Follow", followSchema);
 //# sourceMappingURL=follow_model.js.map
