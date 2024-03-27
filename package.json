@@ -6,10 +6,10 @@
   "scripts": {
     "test": "tsc && jest --detectOpenHandles --runInBand --forceExit",
     "testCoverage": "tsc && jest --detectOpenHandles --runInBand --coverage",
-    "start": "tsc && node ./dist/src/server.js",
+    "start": "tsc && node ./src/server.js",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
     "prod": "cp .envprod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production",
-    "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json &&  node ./dist/src/server.js"
+    "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json &&  node ./src/server.js"
   },
   "author": "Ofir Zion",
   "license": "ISC",
