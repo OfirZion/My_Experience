@@ -11,7 +11,7 @@ const authMiddleware = (req, res, next) => {
         jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
             if (err) {
                 res.status(401).json({
-                    message: "Unauthorized",
+                    message: err,
                     status: 401
                 });
             }

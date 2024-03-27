@@ -54,7 +54,7 @@ class RatingPostController extends BaseController<IPostRating> {
                     rated = await rated.save();
                     res.status(200).json({
                         data: rated,
-                        message: "Rating updated",
+                        message: "Rating updated - Changed",
                         status: 200
                     });
                     return
@@ -63,7 +63,7 @@ class RatingPostController extends BaseController<IPostRating> {
                 if(updated) {
                     res.status(200).json({
                         data: updated,
-                        message: "Rating updated",
+                        message: "Rating updated - Deleted",
                         status: 200
                     });
                     return
@@ -150,7 +150,21 @@ class RatingPostController extends BaseController<IPostRating> {
                 status: 500
             });
         }
-    }       
+    }   
+    
+    async get(req: Request, res: Response) {
+        res.status(405).json({
+            message: "Method not allowed",
+            status: 405
+        });
+    } 
+
+    async getById(req: Request, res: Response) {
+        res.status(405).json({
+            message: "Method not allowed",
+            status: 405
+        });
+    }
 } 
 
-export default new RatingPostController(); // override post with owner = user._id later
+export default new RatingPostController(); 

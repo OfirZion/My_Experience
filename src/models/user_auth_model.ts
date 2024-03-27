@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema, Types, UpdateQuery } from "mongoose";
 import { IUser } from "./user_model";
 import { hashSync, compareSync } from 'bcrypt'
 
@@ -7,7 +7,7 @@ export interface IUserAuth {
     password: string; // _id?: ObjectId; ?
     refreshTokens?: string[]; //  ObjectId[] ?
     user?: (Types.ObjectId | IUser | Schema.Types.ObjectId)
-    comparePassword?: (candidatePassword: string) => boolean; // ? is this correct
+    comparePassword?: (candidatePassword: string) => boolean; 
 }
 
 const userAuthSchema = new mongoose.Schema<IUserAuth>({
@@ -21,12 +21,21 @@ const userAuthSchema = new mongoose.Schema<IUserAuth>({
 // pre save function
 userAuthSchema.pre("save", async function (next) {
     if (this.isModified("password")) {
-        // hash password
-        this.password = hashSync(this.password, 10);
+        const hash = hashSync(this.password, 10);
+        this.password = hash;
     }
-    next()
+    next();
 });
 
+userAuthSchema.pre("findOneAndUpdate", async function (next) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const update: UpdateQuery<any> = this.getUpdate();
+    if (update.password) {
+        const hash = hashSync(update.password, 10);
+        update.password = hash;
+    }
+    next();
+});
 userAuthSchema.methods.comparePassword = function (candidatePassword: string) {
     return compareSync(candidatePassword, this.password);
 }

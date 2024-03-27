@@ -1,4 +1,3 @@
-// import { Request, Response } from 'express';
 import { BaseController } from './base_controller';
 import CommentRating,{ICommentRating}  from '../models/rating_comment_model';
 import {Request, Response} from 'express';
@@ -16,9 +15,9 @@ class RatingCommentController extends BaseController<ICommentRating> {
         const commentId = req.params.id;
         try {
             const newRating = await this.model.create({
-                ...ratingBody,
                 user: userAuth._id,
-                comment: commentId
+                comment: commentId,
+                rating_type: ratingBody.rating_type
             });
 
             // add the rating to the comment
@@ -76,7 +75,21 @@ class RatingCommentController extends BaseController<ICommentRating> {
                 status: 500
             });
         }
+    } 
+
+    async get(req: Request, res: Response) {
+        res.status(405).json({
+            message: "Method not allowed",
+            status: 405
+        });
+    } 
+
+    async getById(req: Request, res: Response) {
+        res.status(405).json({
+            message: "Method not allowed",
+            status: 405
+        });
     }
 } 
 
-export default new RatingCommentController(); // override post with owner = user._id later
+export default new RatingCommentController(); 

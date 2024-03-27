@@ -44,8 +44,19 @@ const userAuthSchema = new mongoose_1.default.Schema({
 userAuthSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (this.isModified("password")) {
-            // hash password
-            this.password = (0, bcrypt_1.hashSync)(this.password, 10);
+            const hash = (0, bcrypt_1.hashSync)(this.password, 10);
+            this.password = hash;
+        }
+        next();
+    });
+});
+userAuthSchema.pre("findOneAndUpdate", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const update = this.getUpdate();
+        if (update.password) {
+            const hash = (0, bcrypt_1.hashSync)(update.password, 10);
+            update.password = hash;
         }
         next();
     });

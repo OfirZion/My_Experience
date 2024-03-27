@@ -65,7 +65,6 @@ class FollowController extends base_controller_1.BaseController {
                         following: req.params.id
                     });
                     follow = yield follow.populate('following');
-                    console.log(follow._id);
                     yield user_model_1.default.findByIdAndUpdate(req.params.id, { $pull: { followers: follow._id } });
                     yield user_model_1.default.findByIdAndUpdate(userAuth._id, { $pull: { following: follow._id } });
                     yield follow.deleteOne();

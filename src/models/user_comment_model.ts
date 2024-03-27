@@ -8,7 +8,7 @@ export interface IUserComment {
     post: (Schema.Types.ObjectId | IUserPost); 
     ratings: (Schema.Types.ObjectId | ICommentRating)[];
     comment_owner_name: string;
-    comment_owner: (Schema.Types.ObjectId | IUser); // (Many to one
+    comment_owner: (Schema.Types.ObjectId | IUser); 
 } 
 
 const userCommentSchema = new mongoose.Schema<IUserComment>({

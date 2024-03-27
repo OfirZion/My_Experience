@@ -52,33 +52,28 @@ class RatingPostController extends base_controller_1.BaseController {
                 const postId = req.params.id;
                 // check if the user has already rated the post
                 let rated = yield this.model.findOne({ user: userAuth._id, post: postId }).populate('user');
-                console.log("1");
                 if (rated) {
-                    console.log("2");
                     if (rated.rating_type !== req.body.rating_type) {
                         rated.rating_type = req.body.rating_type;
                         rated = yield rated.save();
                         res.status(200).json({
                             data: rated,
-                            message: "Rating updated",
+                            message: "Rating updated - Changed",
                             status: 200
                         });
-                        console.log("3");
                         return;
                     }
                     const updated = yield this._delete(req, res, rated);
                     if (updated) {
                         res.status(200).json({
                             data: updated,
-                            message: "Rating updated",
+                            message: "Rating updated - Deleted",
                             status: 200
                         });
-                        console.log("4");
                         return;
                     }
                 }
                 else {
-                    console.log("5");
                     const newRating = yield this._post(req);
                     res.status(201).json({
                         data: newRating,
@@ -89,7 +84,6 @@ class RatingPostController extends base_controller_1.BaseController {
                 }
             }
             catch (error) {
-                console.log("6");
                 res.status(406).json({
                     message: error.message,
                     status: 406
@@ -100,10 +94,8 @@ class RatingPostController extends base_controller_1.BaseController {
     _delete(req, res, rating) {
         return __awaiter(this, void 0, void 0, function* () {
             const userAuth = req.user;
-            console.log("x");
             const owner = rating.user._id.toString();
             if (owner !== userAuth._id) {
-                console.log("y");
                 res.status(401).json({
                     message: "Unauthorized",
                     status: 401
@@ -163,6 +155,22 @@ class RatingPostController extends base_controller_1.BaseController {
             }
         });
     }
+    get(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            res.status(405).json({
+                message: "Method not allowed",
+                status: 405
+            });
+        });
+    }
+    getById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            res.status(405).json({
+                message: "Method not allowed",
+                status: 405
+            });
+        });
+    }
 }
-exports.default = new RatingPostController(); // override post with owner = user._id later
+exports.default = new RatingPostController();
 //# sourceMappingURL=rating_post_controller.js.map

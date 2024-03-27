@@ -40,9 +40,10 @@ class RatingUserController extends BaseController<IUserRating> {
             }
 
             let newRating = await this.model.create({
-                ...ratingBody,
                 rating_user: userAuth._id,
-                rated_user: userId
+                rated_user: userId,
+                rating: ratingBody.rating_type.toString(),
+                rating_type: ratingBody.rating_type
             });
             newRating = await newRating.populate('rated_user');
 
@@ -61,7 +62,21 @@ class RatingUserController extends BaseController<IUserRating> {
     }
 
 
-    async put (req: Request, res: Response) {
+    async put(req: Request, res: Response) {
+        res.status(405).json({
+            message: "Method not allowed",
+            status: 405
+        });
+    } 
+   
+    async get(req: Request, res: Response) {
+        res.status(405).json({
+            message: "Method not allowed",
+            status: 405
+        });
+    } 
+
+    async getById(req: Request, res: Response) {
         res.status(405).json({
             message: "Method not allowed",
             status: 405

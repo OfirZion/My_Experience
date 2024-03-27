@@ -1,43 +1,59 @@
 import { Request, Response } from 'express';
 import User, { IUser } from '../models/user_model';
+import { Document } from 'mongoose';
 import jwt from 'jsonwebtoken';
-//import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library';
 import UserAuth, { IUserAuth } from '../models/user_auth_model';
 
-// const client = new OAuth2Client();
-// const googleSignin = async (req: Request, res: Response) => {
-//     console.log(req.body);
-//     try {
-//         const ticket = await client.verifyIdToken({
-//             idToken: req.body.credential,
-//             audience: process.env.GOOGLE_CLIENT_ID,
-//         });
-//         const payload = ticket.getPayload();
-//         const email = payload?.email;
-//         if (email != null) {
-//             let user = await User.findOne({ 'email': email });
-//             if (user == null) {
-//                 user = await User.create(
-//                     {
-//                         'email': email,
-//                         'password': '0',
-//                         'imgUrl': payload?.picture
-//                     });
-//             }
-//             const tokens = await generateTokens(user)
-//             res.status(200).send(
-//                 {
-//                     email: user.email,
-//                     _id: user._id,
-//                     imgUrl: user.imgUrl,
-//                     ...tokens
-//                 })
-//         }
-//     } catch (err) {
-//         return res.status(400).send(err.message);
-//     }
+const client = new OAuth2Client();
+/* istanbul ignore next */
+const googleSignin = async (req: Request, res: Response) => {
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: req.body.credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const email = payload?.email;
+        if (email != null) {
+            let auth = await UserAuth.findOne({ 'email': email }).populate('user');
+            //eslint-disable-next-line
+            let user = auth?.user as (Document<any, any, IUser> & IUser ) | undefined;
+            if (auth == null) {
+                user = await User.create(
+                    {
+                        'email': email,
+                        'password': '0',
+                        'imgUrl': payload?.picture
+                    });
+                auth = await UserAuth.create(
+                    {
+                        'email': email,
+                        'password': '0'
+                    });
+                user.auth = auth._id;
+                auth.user = user._id;
+                await user.save();
+                await auth.save();    
+            }
+            const tokens = await generateTokens(user, auth)
+            return res.status(201).json({
+                data:{
+                     email: auth.email,
+                     _id: user._id,
+                     imgUrl: user.imgUrl,
+                     ...tokens
+                 },
+                 message: "User created",
+                 status: 201
+             })
+        }
+    } catch (err) {
+        console.log(err.message)
+        return res.status(400).send(err.message);
+    }
 
-// }  
+}  
 
 const register = async (req: Request, res: Response) => {
     try {
@@ -84,24 +100,15 @@ const register = async (req: Request, res: Response) => {
     }
 }
 
-// const generateTokens = async (user: Document & IUser) => {
-//     const accessToken = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
-//     const refreshToken = jwt.sign({ _id: user._id }, process.env.JWT_REFRESH_SECRET);
-//     if (user.refreshTokens == null) {
-//         user.refreshTokens = [refreshToken];
-//     } else {
-//         user.refreshTokens.push(refreshToken);
-//     }
-//     await user.save();
-//     return {
-//         'accessToken': accessToken,
-//         'refreshToken': refreshToken
-//     };
-// } 
-
-const generateTokens = async (user: IUser, auth: IUserAuth) => {
-    const accessToken = jwt.sign({ email: auth.email, _id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+const generateTokens = async (user: IUser, auth: Document<unknown, unknown,IUserAuth> & IUserAuth) => {
+    const accessToken = jwt.sign({ email: auth.email, _id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION }); 
     const refreshToken = jwt.sign({ email: auth.email, _id: user._id }, process.env.REFRESH_TOKEN_SECRET);
+    if (auth.refreshTokens == null) {
+        auth.refreshTokens = [refreshToken];
+    } else {
+        auth.refreshTokens.push(refreshToken);
+    }
+     await auth.save();
     return { accessToken, refreshToken };
 }
 
@@ -114,7 +121,7 @@ const login = async (req: Request, res: Response) => {
         });
     }
     try {
-        const auth: IUserAuth = await UserAuth.findOne({ email }).populate('user');
+        const auth: Document<unknown,unknown, IUserAuth> & IUserAuth = await UserAuth.findOne({ email }).populate('user');
         if (!auth) {
             return res.status(401).json({
                 message: "email or password incorrect",
@@ -143,23 +150,22 @@ const login = async (req: Request, res: Response) => {
 }
 
 const logout = async (req: Request, res: Response) => {
-    const authHeader = req.headers['authorization'];
+    const authHeader = (req.headers['authorization'] || req.headers['Authorization']) as string; 
     const refreshToken = authHeader && authHeader.split(' ')[1]; // Bearer <token>
     if (refreshToken == null) return res.status(401).json({
         message: "missing refresh token",
         status: 401
-    })
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, user: { '_id': string }) => {
-        console.log(err);
+    });
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, user: { _id: string, email:string }) => {
         if (err) return res.status(401).json({
             message: "invalid refresh token",
             status: 401
         });
         try {
-            const userDb = await UserAuth.findById(user._id);
+            const userDb = await UserAuth.findOne({user: user._id});
             if (!userDb.refreshTokens || !userDb.refreshTokens.includes(refreshToken)) {
                 userDb.refreshTokens = [];
-                await userDb.save();
+                await userDb.save(); 
                 return res.status(401).json({
                     message: "invalid refresh token",
                     status: 401
@@ -170,7 +176,7 @@ const logout = async (req: Request, res: Response) => {
                 return res.status(200).json({
                     message: "logout success",
                     status: 200,
-                    data: userDb
+                    data: userDb 
                 });
             }
         } catch (err) {
@@ -183,39 +189,39 @@ const logout = async (req: Request, res: Response) => {
 }
 
 const refresh = async (req: Request, res: Response) => {
-    const authHeader = req.headers['authorization'];
+    const authHeader = (req.headers['authorization'] || req.headers['Authorization']) as string;  
     const refreshToken = authHeader && authHeader.split(' ')[1]; // Bearer <token>
     if (refreshToken == null) return res.status(401).json({
         message: "missing refresh token",
         status: 401
     });
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, user: { '_id': string }) => {
+    
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, user: { _id: string, email:string }) => {
         if (err) {
-            console.log(err);
             return res.status(401).json({
                 message: "invalid refresh token",
                 status: 401
             });
         }
         try {
-            const userDb = await UserAuth.findById(user._id);
-            if (!userDb.refreshTokens || !userDb.refreshTokens.includes(refreshToken)) {
-                userDb.refreshTokens = [];
-                await userDb.save();
+            const authDb = await UserAuth.findOne({ user: user._id });
+            if (!authDb.refreshTokens || !authDb.refreshTokens.includes(refreshToken)) {
+                authDb.refreshTokens = [];
+                await authDb.save(); 
                 return res.status(401).json({
                     message: "invalid refresh token",
                     status: 401
                 });
             }
-            const accessToken = jwt.sign({ _id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-            const newRefreshToken = jwt.sign({ _id: user._id }, process.env.REFRESH_TOKEN_SECRET);
-            userDb.refreshTokens = userDb.refreshTokens.filter(t => t !== refreshToken);
-            userDb.refreshTokens.push(newRefreshToken);
-            await userDb.save();
+            const accessToken = jwt.sign({ _id: user._id, email: authDb.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
+            const newRefreshToken = jwt.sign({ _id: user._id, email: authDb.email }, process.env.REFRESH_TOKEN_SECRET);
+            authDb.refreshTokens = authDb.refreshTokens.filter(t => t !== refreshToken);
+            authDb.refreshTokens.push(newRefreshToken);
+            await authDb.save();
             return res.status(200).send({
                 data:{
                     'accessToken': accessToken,
-                    'refreshToken': refreshToken
+                    'refreshToken': newRefreshToken
                 },
                 message: "refresh success",
                 status: 200
@@ -233,7 +239,7 @@ const refresh = async (req: Request, res: Response) => {
 
 
 export default {
-    //googleSignin,
+    googleSignin,
     register,
     login,
     logout,

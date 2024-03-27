@@ -56,7 +56,7 @@ class UserCommentController extends base_controller_1.BaseController {
                     });
                     return;
                 }
-                const owner = comment.comment_owner.toString();
+                const owner = comment.comment_owner._id.toString();
                 const post = comment.post;
                 if (owner !== userAuth._id && userAuth._id != post.post_owner.toString()) {
                     res.status(401).json({
@@ -90,6 +90,24 @@ class UserCommentController extends base_controller_1.BaseController {
                 res.status(200).json({
                     data: comments,
                     message: "Data found - get",
+                    status: 200
+                });
+            }
+            catch (error) {
+                res.status(500).json({
+                    message: error.message,
+                    status: 500
+                });
+            }
+        });
+    }
+    getById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const comment = yield this.model.findById(req.params.id).populate(['comment_owner', 'post', 'ratings']);
+                res.status(200).json({
+                    data: comment,
+                    message: "Data found - getById",
                     status: 200
                 });
             }
@@ -137,5 +155,5 @@ class UserCommentController extends base_controller_1.BaseController {
         });
     }
 }
-exports.default = new UserCommentController(); // override post with owner = user._id later
+exports.default = new UserCommentController();
 //# sourceMappingURL=user_comment_controller.js.map

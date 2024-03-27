@@ -5,12 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose")); //Schema,
 const userSchema = new mongoose_1.default.Schema({
-    name: { type: String, required: true },
-    age: { type: Number, required: true },
-    auth: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "UserAuth" }, // INITIALIZE LATER AFTER IMPLEMENTING USER_AUTH
+    name: { type: String, required: false, default: "Anonymous" },
+    age: { type: Number, required: false, default: 0 },
+    auth: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "UserAuth" },
     imgUrl: { type: String, required: false },
     ratings: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "UserRating", required: false }], // {array of ratings}
-    posts: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "UserPost", required: false }], // {array of following}
+    posts: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "UserPost", required: false }], // {array of posts}
     followers: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "Follow", required: false }], // {array of following}
     following: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "Follow", required: false }] // {array of followers}
 });

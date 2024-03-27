@@ -1,10 +1,11 @@
-import mongoose, { Schema } from "mongoose"; 
+import mongoose, { ObjectId, Schema } from "mongoose"; 
 import { IUser } from "./user_model";
 
 export interface IFollow {
     follower: Schema.Types.ObjectId | IUser
     following: Schema.Types.ObjectId | IUser
-    dateAdded?: Date; //not sure if should be not required?
+    _id?: ObjectId; 
+    dateAdded?: Date; 
 } 
 
 const followSchema = new mongoose.Schema<IFollow>({

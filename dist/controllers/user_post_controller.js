@@ -45,6 +45,56 @@ class UserPostController extends base_controller_1.BaseController {
             }
         });
     }
+    getById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield this.model.findById(req.params.id).sort({}).populate([{ path: "ratings", model: "PostRating" },
+                    { path: "post_owner", model: "User" },
+                    { path: "comments", model: "UserComment",
+                        populate: [{ path: "ratings", model: "CommentRating",
+                                populate: { path: "user", model: "User" }
+                            }, { path: "comment_owner", model: "User" }]
+                    }
+                ]);
+                res.status(200).json({
+                    data: response,
+                    message: "Data found",
+                    status: 200
+                });
+            }
+            catch (error) {
+                res.status(500).json({
+                    message: error.message,
+                    status: 500
+                });
+            }
+        });
+    }
+    getByOwner(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield this.model.find({ post_owner: req.params.post_owner }).sort({}).populate([{ path: "ratings", model: "PostRating" },
+                    { path: "post_owner", model: "User" },
+                    { path: "comments", model: "UserComment",
+                        populate: [{ path: "ratings", model: "CommentRating",
+                                populate: { path: "user", model: "User" }
+                            }, { path: "comment_owner", model: "User" }]
+                    }
+                ]);
+                res.status(200).json({
+                    data: response,
+                    message: "Data found",
+                    status: 200
+                });
+            }
+            catch (error) {
+                res.status(500).json({
+                    message: error.message,
+                    status: 500
+                });
+            }
+        });
+    }
     post(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const postBody = req.body;
@@ -145,5 +195,5 @@ class UserPostController extends base_controller_1.BaseController {
         });
     }
 }
-exports.default = new UserPostController(); // override post with owner = user._id later
+exports.default = new UserPostController();
 //# sourceMappingURL=user_post_controller.js.map

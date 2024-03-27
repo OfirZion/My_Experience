@@ -7,6 +7,7 @@ import{
     Response
 } from 'express';
 import { ObjectId } from 'mongoose';
+import { IUser } from '../models/user_model';
 
 class UserCommentController extends BaseController<IUserComment>{
     constructor() {
@@ -59,7 +60,8 @@ class UserCommentController extends BaseController<IUserComment>{
                 });
                 return
             }
-            const owner = (comment.comment_owner as ObjectId).toString()
+            
+            const owner = (comment.comment_owner as IUser)._id.toString()
             const post = comment.post as IUserPost
             if (owner !== userAuth._id && userAuth._id != post.post_owner.toString()  ) {
                 res.status(401).json({
@@ -94,6 +96,25 @@ class UserCommentController extends BaseController<IUserComment>{
             res.status(200).json({
                 data: comments,
                 message: "Data found - get",
+                status: 200
+            });
+        } catch (error) {
+            res.status(500).json({
+                message: error.message,
+                status: 500
+            });
+        }
+    } 
+
+    async getById(
+        req: Request, 
+        res: Response
+    ) {
+        try {
+            const comment = await this.model.findById(req.params.id).populate(['comment_owner', 'post', 'ratings']);
+            res.status(200).json({
+                data: comment,
+                message: "Data found - getById",
                 status: 200
             });
         } catch (error) {
@@ -141,4 +162,4 @@ class UserCommentController extends BaseController<IUserComment>{
     }
 } 
 
-export default new UserCommentController(); // override post with owner = user._id later
+export default new UserCommentController(); 

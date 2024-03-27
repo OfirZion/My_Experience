@@ -7,7 +7,7 @@ import { IUserRating } from "./rating_user_model";
 export interface IUser {
     name: string;
     age: number;
-    _id?: ObjectId; // change to reference IF CAUSES ISSUES WHEN UPDATING USER_AUTH. maybe change to {type: Schema.Types.ObjectId}. Change back to required later?  
+    _id?: ObjectId; 
     imgUrl?: string;
     auth: Types.ObjectId | IUserAuth;
     ratings: (Types.ObjectId | IUserRating)[]; // (Many to many)
@@ -17,12 +17,12 @@ export interface IUser {
 } 
 
 const userSchema = new mongoose.Schema<IUser>({
-    name: {type: String, required: true},
-    age: {type: Number, required: true},
-    auth: { type: mongoose.Schema.Types.ObjectId, ref:"UserAuth" }, // INITIALIZE LATER AFTER IMPLEMENTING USER_AUTH
+    name: {type: String, required: false,default: "Anonymous"},
+    age: {type: Number, required: false, default: 0},
+    auth: { type: mongoose.Schema.Types.ObjectId, ref:"UserAuth" }, 
     imgUrl: {type: String, required: false},
     ratings: [{type: mongoose.Schema.Types.ObjectId, ref:"UserRating", required: false}], // {array of ratings}
-    posts: [{type: mongoose.Schema.Types.ObjectId, ref:"UserPost", required: false}], // {array of following}
+    posts: [{type: mongoose.Schema.Types.ObjectId, ref:"UserPost", required: false}], // {array of posts}
     followers: [{type: mongoose.Schema.Types.ObjectId, ref:"Follow", required: false}], // {array of following}
     following: [{type: mongoose.Schema.Types.ObjectId, ref:"Follow", required: false}] // {array of followers}
 }); 

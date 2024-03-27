@@ -11,7 +11,7 @@ const authMiddleware: RequestHandler = (req, res, next) => {
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user: UserAuthT) => {
             if (err) {
                 res.status(401).json({
-                    message: "Unauthorized",
+                    message: err,
                     status: 401
                 });
             } else {

@@ -47,7 +47,12 @@ class RatingUserController extends base_controller_1.BaseController {
                     });
                     return;
                 }
-                let newRating = yield this.model.create(Object.assign(Object.assign({}, ratingBody), { rating_user: userAuth._id, rated_user: userId }));
+                let newRating = yield this.model.create({
+                    rating_user: userAuth._id,
+                    rated_user: userId,
+                    rating: ratingBody.rating_type.toString(),
+                    rating_type: ratingBody.rating_type
+                });
                 newRating = yield newRating.populate('rated_user');
                 yield user_model_1.default.findByIdAndUpdate(userId, { $push: { ratings: newRating._id } });
                 res.status(201).json({
@@ -65,6 +70,22 @@ class RatingUserController extends base_controller_1.BaseController {
         });
     }
     put(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            res.status(405).json({
+                message: "Method not allowed",
+                status: 405
+            });
+        });
+    }
+    get(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            res.status(405).json({
+                message: "Method not allowed",
+                status: 405
+            });
+        });
+    }
+    getById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             res.status(405).json({
                 message: "Method not allowed",

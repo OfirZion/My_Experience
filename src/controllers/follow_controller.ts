@@ -55,7 +55,6 @@ class FollowController extends BaseController<IFollow> {
                 });
                 follow = await follow.populate('following')
 
-                console.log(follow._id)
                 await User.findByIdAndUpdate(req.params.id, { $pull: { followers: follow._id } });
                 await User.findByIdAndUpdate(userAuth._id, { $pull: { following:  follow._id } });
                 await follow.deleteOne()

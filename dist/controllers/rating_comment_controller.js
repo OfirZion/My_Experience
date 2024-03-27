@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// import { Request, Response } from 'express';
 const base_controller_1 = require("./base_controller");
 const rating_comment_model_1 = __importDefault(require("../models/rating_comment_model"));
 const user_comment_model_1 = __importDefault(require("../models/user_comment_model"));
@@ -27,7 +26,11 @@ class RatingCommentController extends base_controller_1.BaseController {
             const ratingBody = req.body;
             const commentId = req.params.id;
             try {
-                const newRating = yield this.model.create(Object.assign(Object.assign({}, ratingBody), { user: userAuth._id, comment: commentId }));
+                const newRating = yield this.model.create({
+                    user: userAuth._id,
+                    comment: commentId,
+                    rating_type: ratingBody.rating_type
+                });
                 // add the rating to the comment
                 yield user_comment_model_1.default.findByIdAndUpdate(commentId, { $push: { ratings: newRating._id } });
                 res.status(201).json({
@@ -88,6 +91,22 @@ class RatingCommentController extends base_controller_1.BaseController {
             }
         });
     }
+    get(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            res.status(405).json({
+                message: "Method not allowed",
+                status: 405
+            });
+        });
+    }
+    getById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            res.status(405).json({
+                message: "Method not allowed",
+                status: 405
+            });
+        });
+    }
 }
-exports.default = new RatingCommentController(); // override post with owner = user._id later
+exports.default = new RatingCommentController();
 //# sourceMappingURL=rating_comment_controller.js.map
